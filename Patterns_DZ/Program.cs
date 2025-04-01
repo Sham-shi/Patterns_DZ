@@ -1,92 +1,121 @@
-﻿using Patterns_DZ.DZ_19_03_25.ChainOfResponsobility;
-using Patterns_DZ.DZ_19_03_25.ChainOfResponsobility.CreditHandlers;
-using Patterns_DZ.DZ_19_03_25.Iterator;
-using Patterns_DZ.DZ_19_03_25.Mediator;
-using Patterns_DZ.DZ_19_03_25.Mediator.Colleagues;
-using Patterns_DZ.DZ_19_03_25.State;
-using Patterns_DZ.DZ_19_03_25.State.WaterStates;
-using Patterns_DZ.DZ_19_03_25.TemplateMethod;
+﻿using Patterns_DZ.DZ_21_03_25.Adapter;
+using Patterns_DZ.DZ_21_03_25.Composite;
+using Patterns_DZ.DZ_21_03_25.Decorator.Decorators;
+using Patterns_DZ.DZ_21_03_25.Decorator.Pizzas;
+using Patterns_DZ.DZ_21_03_25.Facade;
+using Patterns_DZ.DZ_21_03_25.Memento;
+using Patterns_DZ.DZ_21_03_25.Proxy;
+using Patterns_DZ.DZ_21_03_25.Visitor.Employees;
+using Patterns_DZ.DZ_21_03_25.Visitor.Visitors;
+using Directory = Patterns_DZ.DZ_21_03_25.Composite.Directory;
+using File = Patterns_DZ.DZ_21_03_25.Composite.File;
 
-Console.WriteLine("Пример использования паттерна State\n");
+var document = new Document("text", "Arial", 14);
+var documentHistory = new DocumentHistory();
 
-var water = new Water(new LiquidWaterState());
+document.PrintCurrentMemento();
+var memento = document.SaveMemento();
 
-water.Heating();
-water.Cooling();
-water.Cooling();
-water.Cooling();
-Console.WriteLine("-----------------------------------------------\n");
+documentHistory.Save(memento);
+
+document.EditText("new text");
+document.ChangeFont("Calibri");
+document.ChangeFontSize(12);
+document.PrintCurrentMemento();
+
+documentHistory.Save(document.SaveMemento());
+
+document.EditText("new new text");
+document.PrintCurrentMemento();
+
+memento = documentHistory.Load();
+document.RestoreMemento(memento);
+document.PrintCurrentMemento();
+
+memento = documentHistory.Load();
+document.RestoreMemento(memento);
+document.PrintCurrentMemento();
 
 
-Console.WriteLine("Пример использования паттерна TemplateMethod\n");
 
-var school = new School();
-var university = new University();
-
-school.Learn();
-university.Learn();
-Console.WriteLine("-----------------------------------------------\n");
-
-
-Console.WriteLine("Пример использования паттерна Iterator\n");
-
-var library = new Library();
-
-library.AddBook(new Book("Война и мир"));
-library.AddBook(new Book("Отцы и дети"));
-library.AddBook(new Book("Маленький принц и лис"));
-
-var libraryIterator = library.CreateNumerator();
-
-while (libraryIterator.HasNext())
+var employees = new List<IVisitable>
 {
-    var book = libraryIterator.Next();
-    Console.WriteLine(book.Name);
-}
-Console.WriteLine("-----------------------------------------------\n");
-
-
-Console.WriteLine("Пример использования паттерна ChainOfResponsobility");
-
-var managerHadler = new ManagerHadler();
-var departmentHeadHandler = new DepartmentHeadHandler();
-var directorHandler = new DirectorHandler();
-
-managerHadler
-    .SetNext(departmentHeadHandler)
-    .SetNext(directorHandler);
-
-List<CreditRequest> requests = new List<CreditRequest>
-{
-    new CreditRequest("Иван Петров", 35_000),
-    new CreditRequest("Анна Сидорова", 150_000),
-    new CreditRequest("Олег Васильев", 750_000),
-    new CreditRequest("Елена Ковалева", 1_000_000)
+    new OfficeEmployee("Petr", 80_000, 10_000),
+    new SalesEmployee("Anna", 120_000, 10_000),
+    new OfficeEmployee("Sveta", 90_000, 20_000),
+    new SalesEmployee("Anvar", 70_000, 40_000)
 };
 
-foreach (var request in requests)
+var compensationVisitor = new CompensationVisitor();
+foreach (var employee in employees)
 {
-    Console.WriteLine($"\nОбработка заявки: {request.ClientName} на {request.Amount}");
-    managerHadler.HandlerRequest(request);
+    employee.Accept(compensationVisitor);
+    Console.WriteLine(compensationVisitor.TotalCompensation);
 }
 
-Console.WriteLine("-----------------------------------------------\n");
+var stockOptionVisitor =  new StockOptionVisitor();
+foreach (var employee in employees)
+{
+    employee.Accept(stockOptionVisitor);
+    Console.WriteLine(stockOptionVisitor.TotalUnit);
+}
 
 
-Console.WriteLine("Пример использования паттерна Mediator");
 
-var manager = new ManagerMediator();
+Pizza pizza1 = new ItalianPizza();
+pizza1 = new TomatoPizza(pizza1);
+Console.WriteLine("Название: " + pizza1.Name);
+Console.WriteLine("Цена: " + pizza1.GetCost());
 
-var customer = new CustomerCollegue(manager);
-var programmer = new ProgrammerCollegue(manager);
-var tester = new TesterCollegue(manager);
+Pizza pizza2 = new BulgerianPizza();
+pizza2 = new TomatoPizza(pizza2);
+pizza2 = new CheesePizza(pizza2);
+Console.WriteLine("Название: " + pizza2.Name);
+Console.WriteLine("Цена: " + pizza2.GetCost());
 
-manager.Customer = customer;
-manager.Programmer = programmer;
-manager.Tester = tester;
 
-customer.Send("Есть заказ, напиши программу");
-programmer.Send("Программа написана протестируй");
-tester.Send("Программа протестирована, заказ выполнен");
 
-Console.WriteLine("-----------------------------------------------\n");
+Driver driver = new Driver();
+Auto auto = new Auto();
+driver.Travel(auto);
+
+Camel camel = new Camel();
+ITransport camelTransport = new CamelToTransportAdapter(camel);
+
+driver.Travel(camelTransport);
+
+
+
+var textEditor = new TextEditor();
+var copiler = new Compiler();
+var clr = new CLR();
+
+var visualStudioFacade = new VisualStudioFacade(textEditor, copiler, clr);
+
+visualStudioFacade.Start();
+visualStudioFacade.Stop();
+
+
+
+Component fileSystem = new Directory("Файловая система");
+Component diskC = new Directory("Диск С");
+
+Component pngFile = new File("Png.png");
+Component docxFile = new File("Document.docx");
+
+diskC.Add(pngFile);
+diskC.Add(docxFile);
+
+fileSystem.Add(diskC);
+
+fileSystem.Print();
+
+diskC.Remove(pngFile);
+
+fileSystem.Print();
+
+
+
+IImage image = new ProxyImage("12.jpeg");
+
+image.Display();
