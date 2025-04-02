@@ -1,121 +1,34 @@
-﻿using Patterns_DZ.DZ_21_03_25.Adapter;
-using Patterns_DZ.DZ_21_03_25.Composite;
-using Patterns_DZ.DZ_21_03_25.Decorator.Decorators;
-using Patterns_DZ.DZ_21_03_25.Decorator.Pizzas;
-using Patterns_DZ.DZ_21_03_25.Facade;
-using Patterns_DZ.DZ_21_03_25.Memento;
-using Patterns_DZ.DZ_21_03_25.Proxy;
-using Patterns_DZ.DZ_21_03_25.Visitor.Employees;
-using Patterns_DZ.DZ_21_03_25.Visitor.Visitors;
-using Directory = Patterns_DZ.DZ_21_03_25.Composite.Directory;
-using File = Patterns_DZ.DZ_21_03_25.Composite.File;
+﻿using Patterns_DZ.DZ_24_03_25.Bridge.Languages;
+using Patterns_DZ.DZ_24_03_25.Bridge.Programmers;
+using Patterns_DZ.DZ_24_03_25.Flyweight;
 
-var document = new Document("text", "Arial", 14);
-var documentHistory = new DocumentHistory();
+double longitude = 34.21;
+double latitude = 13.44;
 
-document.PrintCurrentMemento();
-var memento = document.SaveMemento();
+var houseFactory = new HouseFactory();
 
-documentHistory.Save(memento);
+House panelHouse = houseFactory.GetHouse("Panel");
+panelHouse.Build(latitude, longitude);
 
-document.EditText("new text");
-document.ChangeFont("Calibri");
-document.ChangeFontSize(12);
-document.PrintCurrentMemento();
+longitude += 0.1;
+latitude += 0.1;
 
-documentHistory.Save(document.SaveMemento());
-
-document.EditText("new new text");
-document.PrintCurrentMemento();
-
-memento = documentHistory.Load();
-document.RestoreMemento(memento);
-document.PrintCurrentMemento();
-
-memento = documentHistory.Load();
-document.RestoreMemento(memento);
-document.PrintCurrentMemento();
+House brickHouse = houseFactory.GetHouse("Brick");
+brickHouse.Build(latitude, longitude);
 
 
 
-var employees = new List<IVisitable>
-{
-    new OfficeEmployee("Petr", 80_000, 10_000),
-    new SalesEmployee("Anna", 120_000, 10_000),
-    new OfficeEmployee("Sveta", 90_000, 20_000),
-    new SalesEmployee("Anvar", 70_000, 40_000)
-};
+var freelancerProgrammer = new FreelancerProgrammer(new CPPLanguage());
 
-var compensationVisitor = new CompensationVisitor();
-foreach (var employee in employees)
-{
-    employee.Accept(compensationVisitor);
-    Console.WriteLine(compensationVisitor.TotalCompensation);
-}
+freelancerProgrammer.DoWOrk();
+freelancerProgrammer.EarnMoney();
 
-var stockOptionVisitor =  new StockOptionVisitor();
-foreach (var employee in employees)
-{
-    employee.Accept(stockOptionVisitor);
-    Console.WriteLine(stockOptionVisitor.TotalUnit);
-}
+var corporateProgrammer = new CorporateProgrammer(new CSharpLanguage());
 
+corporateProgrammer.DoWOrk();
+corporateProgrammer.EarnMoney();
 
+freelancerProgrammer.Language = new CSharpLanguage();
 
-Pizza pizza1 = new ItalianPizza();
-pizza1 = new TomatoPizza(pizza1);
-Console.WriteLine("Название: " + pizza1.Name);
-Console.WriteLine("Цена: " + pizza1.GetCost());
-
-Pizza pizza2 = new BulgerianPizza();
-pizza2 = new TomatoPizza(pizza2);
-pizza2 = new CheesePizza(pizza2);
-Console.WriteLine("Название: " + pizza2.Name);
-Console.WriteLine("Цена: " + pizza2.GetCost());
-
-
-
-Driver driver = new Driver();
-Auto auto = new Auto();
-driver.Travel(auto);
-
-Camel camel = new Camel();
-ITransport camelTransport = new CamelToTransportAdapter(camel);
-
-driver.Travel(camelTransport);
-
-
-
-var textEditor = new TextEditor();
-var copiler = new Compiler();
-var clr = new CLR();
-
-var visualStudioFacade = new VisualStudioFacade(textEditor, copiler, clr);
-
-visualStudioFacade.Start();
-visualStudioFacade.Stop();
-
-
-
-Component fileSystem = new Directory("Файловая система");
-Component diskC = new Directory("Диск С");
-
-Component pngFile = new File("Png.png");
-Component docxFile = new File("Document.docx");
-
-diskC.Add(pngFile);
-diskC.Add(docxFile);
-
-fileSystem.Add(diskC);
-
-fileSystem.Print();
-
-diskC.Remove(pngFile);
-
-fileSystem.Print();
-
-
-
-IImage image = new ProxyImage("12.jpeg");
-
-image.Display();
+freelancerProgrammer.DoWOrk();
+freelancerProgrammer.EarnMoney();
